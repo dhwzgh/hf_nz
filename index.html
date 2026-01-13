@@ -3,298 +3,373 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API 服务 - 数据处理平台</title>
+    <title>API Nexus - 智能数据中枢</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #00f2fe;
+            --glass: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --text-main: #2d3748;
+            --text-light: #718096;
         }
-        
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            overflow-x: hidden;
+            position: relative;
         }
-        
+
+        /* 动态背景球体 */
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            animation: float 10s infinite ease-in-out;
+        }
+        .shape-1 { width: 300px; height: 300px; background: #667eea; top: -50px; left: -50px; animation-delay: 0s; }
+        .shape-2 { width: 400px; height: 400px; background: #764ba2; bottom: -100px; right: -100px; animation-delay: -5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, 50px); }
+        }
+
         .container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
             max-width: 600px;
             width: 100%;
-            padding: 60px 40px;
+            padding: 50px 40px;
             text-align: center;
+            transition: transform 0.3s;
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        /* Logo 区域 */
+        .logo-wrapper {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 20px;
+        }
+
         .logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
-        }
-        
-        h1 {
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-        
-        .subtitle {
-            color: #666;
-            font-size: 16px;
-            margin-bottom: 40px;
-            line-height: 1.6;
-        }
-        
-        .status-box {
-            background: #f8f9fa;
-            border-left: 4px solid #667eea;
-            padding: 20px;
-            margin-bottom: 30px;
-            border-radius: 6px;
-            text-align: left;
-        }
-        
-        .status-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-            font-size: 14px;
-            color: #555;
-        }
-        
-        .status-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .status-icon {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #10b981;
-            margin-right: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 45px;
             color: white;
-            font-size: 12px;
-            font-weight: bold;
+            box-shadow: 0 10px 25px rgba(118, 75, 162, 0.4);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            cursor: pointer;
+            z-index: 2;
+            position: relative;
+        }
+
+        .logo:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .logo-ping {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 24px;
+            background: var(--primary);
+            opacity: 0.5;
+            z-index: 1;
+            animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes ping { 75%, 100% { transform: scale(1.5); opacity: 0; } }
+
+        h1 {
+            color: var(--text-main);
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 16px;
+            margin-bottom: 30px;
+            height: 24px; /* 占位防止跳动 */
+            font-family: 'Courier New', monospace;
+        }
+
+        /* 状态指示灯 */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 16px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 50px;
+            color: #059669;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 30px;
         }
         
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 10px #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* 特性卡片 */
         .features {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 40px;
-            text-align: left;
+            gap: 15px;
+            margin-bottom: 30px;
         }
-        
+
         .feature-item {
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+            cursor: default;
         }
-        
-        .feature-icon {
-            font-size: 24px;
-            margin-bottom: 8px;
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
-        
-        .feature-title {
-            font-weight: 600;
-            color: #333;
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-        
-        .feature-desc {
-            color: #666;
-            font-size: 12px;
-        }
-        
-        .info-box {
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            border-radius: 8px;
+
+        .feature-icon { font-size: 28px; margin-bottom: 10px; }
+        .feature-title { font-weight: 700; color: var(--text-main); font-size: 15px; margin-bottom: 5px; }
+        .feature-desc { color: var(--text-light); font-size: 12px; }
+
+        /* 伪终端控制台 */
+        .terminal-box {
+            background: #1e1e1e;
+            border-radius: 12px;
             padding: 20px;
             margin-bottom: 30px;
-            color: #1e40af;
+            text-align: left;
+            font-family: 'Courier New', monospace;
             font-size: 13px;
-            line-height: 1.6;
+            color: #00ff00;
+            display: none; /* 默认隐藏 */
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            border: 1px solid #333;
         }
-        
-        .info-box strong {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-        
-        .button-group {
+        .terminal-header {
             display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
         }
-        
+        .t-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .red { background: #ff5f56; } .yellow { background: #ffbd2e; } .green { background: #27c93f; }
+
+        /* 按钮组 */
+        .button-group { display: flex; gap: 15px; justify-content: center; }
+
         .btn {
-            padding: 12px 24px;
-            border-radius: 6px;
+            padding: 14px 30px;
+            border-radius: 12px;
             border: none;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
+            position: relative;
+            overflow: hidden;
         }
-        
+
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
             color: white;
+            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
         }
-        
+
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 8px 25px rgba(118, 75, 162, 0.5);
         }
-        
+
         .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-            border: 1px solid #ddd;
+            background: white;
+            color: var(--text-main);
+            border: 1px solid rgba(0,0,0,0.05);
         }
-        
-        .btn-secondary:hover {
-            background: #e8e8e8;
-        }
-        
+
+        .btn-secondary:hover { background: #f8f9fa; transform: translateY(-2px); }
+
+        .btn:active { transform: scale(0.98); }
+
+        /* 底部信息 */
         .footer {
             margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            color: #999;
             font-size: 12px;
+            color: var(--text-light);
+            opacity: 0.7;
         }
-        
-        .footer a {
-            color: #667eea;
-            text-decoration: none;
-        }
-        
-        .footer a:hover {
-            text-decoration: underline;
-        }
-        
-        @media (max-width: 600px) {
-            .container {
-                padding: 40px 20px;
-            }
-            
-            h1 {
-                font-size: 24px;
-            }
-            
-            .features {
-                grid-template-columns: 1fr;
-            }
+
+        /* 响应式 */
+        @media (max-width: 480px) {
+            .container { padding: 30px 20px; }
+            .features { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
+    <!-- 背景装饰 -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
     <div class="container">
-        <div class="logo">🚀</div>
-        
-        <h1>API 服务平台</h1>
-        <p class="subtitle">高性能数据处理与监控服务</p>
-        
-        <div class="status-box">
-            <div class="status-item">
-                <div class="status-icon">✓</div>
-                <span><strong>服务状态：</strong>正常运行</span>
-            </div>
-            <div class="status-item">
-                <div class="status-icon">✓</div>
-                <span><strong>API 版本：</strong>v1.0</span>
-            </div>
-            <div class="status-item">
-                <div class="status-icon">✓</div>
-                <span><strong>响应时间：</strong>&lt; 100ms</span>
-            </div>
+        <div class="logo-wrapper">
+            <div class="logo-ping"></div>
+            <div class="logo" id="rocketLogo">🚀</div>
         </div>
         
+        <h1>API Nexus</h1>
+        <!-- 打字机效果容器 -->
+        <p class="subtitle" id="typewriter"></p>
+
+        <!-- 极简状态栏 -->
+        <div class="status-pill">
+            <div class="dot"></div> System Operational
+        </div>
+
         <div class="features">
             <div class="feature-item">
-                <div class="feature-icon">📊</div>
-                <div class="feature-title">实时监控</div>
-                <div class="feature-desc">全天候系统监控</div>
-            </div>
-            <div class="feature-item">
-                <div class="feature-icon">🔒</div>
-                <div class="feature-title">安全加密</div>
-                <div class="feature-desc">企业级数据保护</div>
-            </div>
-            <div class="feature-item">
                 <div class="feature-icon">⚡</div>
-                <div class="feature-title">高性能</div>
-                <div class="feature-desc">毫秒级响应</div>
+                <div class="feature-title">极速响应</div>
+                <div class="feature-desc">平均延迟 < 20ms</div>
             </div>
             <div class="feature-item">
-                <div class="feature-icon">🌐</div>
-                <div class="feature-title">全球部署</div>
-                <div class="feature-desc">多地域支持</div>
+                <div class="feature-icon">🛡️</div>
+                <div class="feature-title">端对端加密</div>
+                <div class="feature-desc">AES-256 银行级防护</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">💎</div>
+                <div class="feature-title">高可用</div>
+                <div class="feature-desc">99.99% SLA 保证</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🌍</div>
+                <div class="feature-title">全球节点</div>
+                <div class="feature-desc">CDN 智能加速</div>
             </div>
         </div>
-        
-        <div class="info-box">
-            <strong>📌 重要提示</strong>
-            这是一个 API 服务端点。如需访问管理面板，请使用授权的域名进行访问。所有请求需要有效的 API 密钥。
+
+        <!-- 隐藏的终端模拟器 -->
+        <div class="terminal-box" id="terminal">
+            <div class="terminal-header">
+                <div class="t-dot red"></div>
+                <div class="t-dot yellow"></div>
+                <div class="t-dot green"></div>
+            </div>
+            <div id="terminal-content"></div>
         </div>
-        
+
+        <div class="info-box" style="margin-bottom: 30px; font-size: 13px; color: #666; background: rgba(255,255,255,0.4); padding: 15px; border-radius: 8px;">
+            🔒 此端点受限访问。请携带 <code>x-api-key</code> 请求头。
+        </div>
+
         <div class="button-group">
-            <button class="btn btn-primary" onclick="showAlert()">查看文档</button>
-            <button class="btn btn-secondary" onclick="checkStatus()">检查状态</button>
+            <button class="btn btn-primary" onclick="window.open('https://huggingface.co', '_blank')">阅读开发文档</button>
+            <button class="btn btn-secondary" onclick="runDiagnostics()">🔍 系统自检</button>
         </div>
-        
+
         <div class="footer">
-            <p>© 2024 API 服务平台 | <a href="#">隐私政策</a> | <a href="#">服务条款</a></p>
-            <p style="margin-top: 8px;">Powered by Hugging Face</p>
+            <p>© 2026 API Nexus Platform. All systems go.</p>
         </div>
     </div>
-    
+
     <script>
-        function showAlert() {
-            alert('API 文档已发送至您的邮箱。\n\n如需获取完整文档，请联系技术支持。');
-        }
-        
-        function checkStatus() {
-            const status = {
-                'API 服务': '✓ 正常',
-                '数据库': '✓ 正常',
-                '缓存服务': '✓ 正常',
-                '消息队列': '✓ 正常'
-            };
-            
-            let message = '系统状态检查结果：\n\n';
-            for (let key in status) {
-                message += key + ': ' + status[key] + '\n';
+        // 1. 打字机效果
+        const text = "高性能分布式数据处理与监控服务";
+        const typeWriterElement = document.getElementById('typewriter');
+        let i = 0;
+
+        function typeWriter() {
+            if (i < text.length) {
+                typeWriterElement.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, 50); // 打字速度
             }
-            alert(message);
         }
         
-        // 防止直接访问敏感路径
-        console.log('API Service Platform v1.0');
+        // 页面加载后启动打字
+        window.onload = typeWriter;
+
+        // 2. 模拟系统自检（好玩的部分）
+        function runDiagnostics() {
+            const terminal = document.getElementById('terminal');
+            const content = document.getElementById('terminal-content');
+            
+            // 显示终端，隐藏其他部分（可选，这里只展开）
+            terminal.style.display = 'block';
+            content.innerHTML = '> Initializing diagnostic protocols...<br>';
+            
+            const steps = [
+                { text: '> Connecting to mesh network...', time: 800 },
+                { text: '> Verifying SSL certificates... [OK]', time: 1600 },
+                { text: '> Ping regional nodes (ASIA-HK)... 12ms', time: 2400 },
+                { text: '> Ping regional nodes (US-WEST)... 145ms', time: 2800 },
+                { text: '> Checking database integrity... 100%', time: 3500 },
+                { text: '<span style="color:#00ff00; font-weight:bold;">> SYSTEM ALL GREEN. READY FOR REQUESTS.</span>', time: 4200 }
+            ];
+
+            // 滚动到底部
+            steps.forEach(step => {
+                setTimeout(() => {
+                    content.innerHTML += step.text + '<br>';
+                    terminal.scrollTop = terminal.scrollHeight;
+                }, step.time);
+            });
+        }
+
+        // 3. 火箭互动
+        const rocket = document.getElementById('rocketLogo');
+        rocket.addEventListener('click', () => {
+            rocket.style.transform = 'translateY(-1000px) scale(0.5)';
+            setTimeout(() => {
+                rocket.style.transition = 'none';
+                rocket.style.transform = 'translateY(100px)';
+                setTimeout(() => {
+                    rocket.style.transition = 'all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                    rocket.style.transform = 'translateY(0)';
+                }, 50);
+            }, 500);
+        });
     </script>
 </body>
 </html>
