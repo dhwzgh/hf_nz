@@ -8,9 +8,8 @@
         :root {
             --primary: #667eea;
             --secondary: #764ba2;
-            --accent: #00f2fe;
             --glass: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-strong: rgba(255, 255, 255, 0.95);
             --text-main: #2d3748;
             --text-light: #718096;
         }
@@ -18,250 +17,121 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            overflow-x: hidden;
+            overflow-x: hidden; /* 防止背景球撑开滚动条 */
             position: relative;
         }
 
-        /* 动态背景球体 */
+        /* --- 修复核心：层级控制 --- */
+        
+        /* 1. 背景装饰 (层级 1) */
         .bg-shape {
-            position: absolute;
+            position: fixed; /* 改为 fixed，防止随页面滚动 */
             border-radius: 50%;
             filter: blur(80px);
-            z-index: -1;
+            z-index: 1; /* 正数层级，但在内容之下 */
             animation: float 10s infinite ease-in-out;
+            pointer-events: none; /* 防止挡住点击 */
         }
-        .shape-1 { width: 300px; height: 300px; background: #667eea; top: -50px; left: -50px; animation-delay: 0s; }
-        .shape-2 { width: 400px; height: 400px; background: #764ba2; bottom: -100px; right: -100px; animation-delay: -5s; }
+        .shape-1 { width: 300px; height: 300px; background: #667eea; top: 10%; left: 10%; }
+        .shape-2 { width: 400px; height: 400px; background: #764ba2; bottom: 10%; right: 10%; animation-delay: -5s; }
 
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(30px, 50px); }
-        }
-
+        /* 2. 主界面容器 (层级 10) */
         .container {
+            position: relative;
+            z-index: 10; /* 确保比背景高 */
+            
             background: var(--glass);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
+            border: 1px solid rgba(255, 255, 255, 0.5);
             border-radius: 24px;
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
             max-width: 600px;
             width: 100%;
             padding: 50px 40px;
             text-align: center;
-            transition: transform 0.3s;
-            position: relative;
-            overflow: hidden;
         }
 
-        /* Logo 区域 */
-        .logo-wrapper {
-            position: relative;
-            width: 90px;
-            height: 90px;
-            margin: 0 auto 20px;
-        }
-
-        .logo {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 24px;
+        /* 3. 弹窗遮罩 (层级 100) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 100; /* 最高层级 */
+            
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 45px;
-            color: white;
-            box-shadow: 0 10px 25px rgba(118, 75, 162, 0.4);
-            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            cursor: pointer;
-            z-index: 2;
-            position: relative;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
         }
 
-        .logo:hover {
-            transform: scale(1.1) rotate(5deg);
+        /* 动画定义 */
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, 50px); }
         }
 
-        .logo-ping {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            border-radius: 24px;
-            background: var(--primary);
-            opacity: 0.5;
-            z-index: 1;
-            animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-        }
-
-        @keyframes ping { 75%, 100% { transform: scale(1.5); opacity: 0; } }
-
-        h1 {
-            color: var(--text-main);
-            font-size: 32px;
-            font-weight: 800;
-            margin-bottom: 10px;
-            letter-spacing: -0.5px;
-        }
-
-        .subtitle {
-            color: var(--text-light);
-            font-size: 16px;
-            margin-bottom: 30px;
-            height: 24px; /* 占位防止跳动 */
-            font-family: 'Courier New', monospace;
-        }
-
-        /* 状态指示灯 */
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            padding: 6px 16px;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            border-radius: 50px;
-            color: #059669;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 30px;
-        }
+        /* ... 其他样式保持不变 ... */
+        .logo-wrapper { position: relative; width: 90px; height: 90px; margin: 0 auto 20px; }
+        .logo { width: 100%; height: 100%; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 45px; color: white; cursor: pointer; transition: transform 0.3s; }
+        .logo:hover { transform: scale(1.1) rotate(5deg); }
         
-        .dot {
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-            margin-right: 8px;
-            box-shadow: 0 0 10px #10b981;
-            animation: pulse 2s infinite;
-        }
-
+        h1 { color: var(--text-main); margin-bottom: 10px; font-weight: 800; }
+        .subtitle { color: var(--text-light); margin-bottom: 30px; min-height: 24px; font-family: monospace; }
+        
+        .status-pill { display: inline-flex; align-items: center; padding: 6px 16px; background: rgba(16, 185, 129, 0.1); border-radius: 50px; color: #059669; font-size: 14px; margin-bottom: 30px; }
+        .dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 8px; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        /* 特性卡片 */
-        .features {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
+        .features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .feature-item { background: rgba(255,255,255,0.5); padding: 20px; border-radius: 16px; transition: transform 0.3s; }
+        .feature-item:hover { transform: translateY(-5px); background: white; }
+        .feature-icon { font-size: 28px; display: block; margin-bottom: 10px; }
+        .feature-title { font-weight: bold; font-size: 15px; color: var(--text-main); }
+        .feature-desc { font-size: 12px; color: var(--text-light); }
 
-        .feature-item {
-            background: rgba(255, 255, 255, 0.5);
-            padding: 20px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            transition: all 0.3s ease;
-            cursor: default;
-        }
-
-        .feature-item:hover {
-            transform: translateY(-5px);
-            background: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        }
-
-        .feature-icon { font-size: 28px; margin-bottom: 10px; }
-        .feature-title { font-weight: 700; color: var(--text-main); font-size: 15px; margin-bottom: 5px; }
-        .feature-desc { color: var(--text-light); font-size: 12px; }
-
-        /* 伪终端控制台 */
-        .terminal-box {
-            background: #1e1e1e;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 30px;
-            text-align: left;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            color: #00ff00;
-            display: none; /* 默认隐藏 */
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            border: 1px solid #333;
-        }
-        .terminal-header {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 10px;
-        }
-        .t-dot { width: 10px; height: 10px; border-radius: 50%; }
-        .red { background: #ff5f56; } .yellow { background: #ffbd2e; } .green { background: #27c93f; }
-
-        /* 按钮组 */
+        .terminal-box { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 30px; text-align: left; font-family: monospace; font-size: 13px; color: #00ff00; display: none; }
+        
         .button-group { display: flex; gap: 15px; justify-content: center; }
-
-        .btn {
-            padding: 14px 30px;
-            border-radius: 12px;
-            border: none;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary {
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            color: white;
-            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(118, 75, 162, 0.5);
-        }
-
-        .btn-secondary {
-            background: white;
-            color: var(--text-main);
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .btn-secondary:hover { background: #f8f9fa; transform: translateY(-2px); }
-
-        .btn:active { transform: scale(0.98); }
-
-        /* 底部信息 */
-        .footer {
-            margin-top: 40px;
-            font-size: 12px;
-            color: var(--text-light);
-            opacity: 0.7;
-        }
-
-        /* 响应式 */
-        @media (max-width: 480px) {
-            .container { padding: 30px 20px; }
-            .features { grid-template-columns: 1fr; }
-        }
+        .btn { padding: 14px 30px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-primary { background: linear-gradient(90deg, var(--primary), var(--secondary)); color: white; }
+        .btn-secondary { background: white; color: var(--text-main); }
+        
+        /* 弹窗样式 */
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-card { background: var(--glass-strong); padding: 40px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; transform: scale(0.8); transition: 0.3s; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .modal-overlay.active .modal-card { transform: scale(1); }
+        .modal-input { width: 100%; padding: 12px; margin: 20px 0; border: 2px solid #e2e8f0; border-radius: 10px; outline: none; }
+        .modal-input:focus { border-color: var(--primary); }
+        .close-modal { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; cursor: pointer; color: #999; }
+        
+        @media (max-width: 480px) { .features { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <!-- 背景装饰 -->
+    <!-- 1. 背景装饰 -->
     <div class="bg-shape shape-1"></div>
     <div class="bg-shape shape-2"></div>
 
+    <!-- 2. 主界面 -->
     <div class="container">
         <div class="logo-wrapper">
-            <div class="logo-ping"></div>
             <div class="logo" id="rocketLogo">🚀</div>
         </div>
         
         <h1>API Nexus</h1>
-        <!-- 打字机效果容器 -->
         <p class="subtitle" id="typewriter"></p>
 
-        <!-- 极简状态栏 -->
         <div class="status-pill">
             <div class="dot"></div> System Operational
         </div>
@@ -270,106 +140,125 @@
             <div class="feature-item">
                 <div class="feature-icon">⚡</div>
                 <div class="feature-title">极速响应</div>
-                <div class="feature-desc">平均延迟 < 20ms</div>
+                <div class="feature-desc">&lt; 20ms</div>
             </div>
             <div class="feature-item">
                 <div class="feature-icon">🛡️</div>
-                <div class="feature-title">端对端加密</div>
-                <div class="feature-desc">AES-256 银行级防护</div>
+                <div class="feature-title">安全加密</div>
+                <div class="feature-desc">AES-256</div>
             </div>
             <div class="feature-item">
                 <div class="feature-icon">💎</div>
                 <div class="feature-title">高可用</div>
-                <div class="feature-desc">99.99% SLA 保证</div>
+                <div class="feature-desc">99.99%</div>
             </div>
             <div class="feature-item">
                 <div class="feature-icon">🌍</div>
                 <div class="feature-title">全球节点</div>
-                <div class="feature-desc">CDN 智能加速</div>
+                <div class="feature-desc">CDN 加速</div>
             </div>
         </div>
 
-        <!-- 隐藏的终端模拟器 -->
         <div class="terminal-box" id="terminal">
-            <div class="terminal-header">
-                <div class="t-dot red"></div>
-                <div class="t-dot yellow"></div>
-                <div class="t-dot green"></div>
+            <div style="margin-bottom:10px; display:flex; gap:5px;">
+                <div style="width:10px; height:10px; background:#ff5f56; border-radius:50%"></div>
+                <div style="width:10px; height:10px; background:#ffbd2e; border-radius:50%"></div>
+                <div style="width:10px; height:10px; background:#27c93f; border-radius:50%"></div>
             </div>
             <div id="terminal-content"></div>
         </div>
 
-        <div class="info-box" style="margin-bottom: 30px; font-size: 13px; color: #666; background: rgba(255,255,255,0.4); padding: 15px; border-radius: 8px;">
-            🔒 此端点受限访问。请携带 <code>x-api-key</code> 请求头。
-        </div>
-
         <div class="button-group">
-            <button class="btn btn-primary" onclick="window.open('https://huggingface.co', '_blank')">阅读开发文档</button>
+            <button class="btn btn-primary" onclick="openEmailModal()">📩 获取开发文档</button>
             <button class="btn btn-secondary" onclick="runDiagnostics()">🔍 系统自检</button>
         </div>
+        
+        <div style="margin-top:40px; font-size:12px; color:#aaa;">© 2026 API Nexus Platform</div>
+    </div>
 
-        <div class="footer">
-            <p>© 2026 API Nexus Platform. All systems go.</p>
+    <!-- 3. 弹窗组件 -->
+    <div class="modal-overlay" id="emailModal" onclick="closeEmailModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <button class="close-modal" onclick="closeEmailModal(event)">×</button>
+            <div style="font-size:40px; margin-bottom:15px;">📧</div>
+            <h3>发送文档至邮箱</h3>
+            <p style="font-size:13px; color:#666; margin-top:5px;">我们将发送完整 API 密钥与示例文档。</p>
+            
+            <input type="email" class="modal-input" id="userEmail" placeholder="name@example.com">
+            
+            <button class="btn btn-primary" id="sendBtn" style="width:100%" onclick="sendEmailAction()">
+                立即发送
+            </button>
         </div>
     </div>
 
     <script>
-        // 1. 打字机效果
+        // 打字机
         const text = "高性能分布式数据处理与监控服务";
-        const typeWriterElement = document.getElementById('typewriter');
         let i = 0;
-
         function typeWriter() {
             if (i < text.length) {
-                typeWriterElement.innerHTML += text.charAt(i);
+                document.getElementById('typewriter').innerHTML += text.charAt(i);
                 i++;
-                setTimeout(typeWriter, 50); // 打字速度
+                setTimeout(typeWriter, 50);
             }
         }
-        
-        // 页面加载后启动打字
         window.onload = typeWriter;
 
-        // 2. 模拟系统自检（好玩的部分）
-        function runDiagnostics() {
-            const terminal = document.getElementById('terminal');
-            const content = document.getElementById('terminal-content');
-            
-            // 显示终端，隐藏其他部分（可选，这里只展开）
-            terminal.style.display = 'block';
-            content.innerHTML = '> Initializing diagnostic protocols...<br>';
-            
-            const steps = [
-                { text: '> Connecting to mesh network...', time: 800 },
-                { text: '> Verifying SSL certificates... [OK]', time: 1600 },
-                { text: '> Ping regional nodes (ASIA-HK)... 12ms', time: 2400 },
-                { text: '> Ping regional nodes (US-WEST)... 145ms', time: 2800 },
-                { text: '> Checking database integrity... 100%', time: 3500 },
-                { text: '<span style="color:#00ff00; font-weight:bold;">> SYSTEM ALL GREEN. READY FOR REQUESTS.</span>', time: 4200 }
-            ];
+        // 弹窗逻辑
+        const modal = document.getElementById('emailModal');
+        const sendBtn = document.getElementById('sendBtn');
+        const emailInput = document.getElementById('userEmail');
 
-            // 滚动到底部
-            steps.forEach(step => {
-                setTimeout(() => {
-                    content.innerHTML += step.text + '<br>';
-                    terminal.scrollTop = terminal.scrollHeight;
-                }, step.time);
-            });
+        function openEmailModal() {
+            modal.classList.add('active');
+            emailInput.value = '';
+            sendBtn.innerHTML = '立即发送';
+            sendBtn.style.background = '';
+            sendBtn.disabled = false;
         }
 
-        // 3. 火箭互动
-        const rocket = document.getElementById('rocketLogo');
-        rocket.addEventListener('click', () => {
-            rocket.style.transform = 'translateY(-1000px) scale(0.5)';
+        function closeEmailModal() {
+            modal.classList.remove('active');
+        }
+
+        function sendEmailAction() {
+            if(!emailInput.value.includes('@')) {
+                alert('请输入有效的邮箱'); return;
+            }
+            sendBtn.innerHTML = '⏳ 发送中...';
+            sendBtn.disabled = true;
             setTimeout(() => {
-                rocket.style.transition = 'none';
-                rocket.style.transform = 'translateY(100px)';
+                sendBtn.innerHTML = '✅ 已发送';
+                sendBtn.style.background = '#10b981';
+                setTimeout(closeEmailModal, 1000);
+            }, 1500);
+        }
+
+        // 自检逻辑
+        function runDiagnostics() {
+            const t = document.getElementById('terminal');
+            const c = document.getElementById('terminal-content');
+            t.style.display = 'block';
+            c.innerHTML = '> Initializing...<br>';
+            setTimeout(() => c.innerHTML += '> Connecting to mesh network...<br>', 500);
+            setTimeout(() => c.innerHTML += '> Verifying SSL... [OK]<br>', 1000);
+            setTimeout(() => c.innerHTML += '> Checking nodes... 100%<br>', 1800);
+            setTimeout(() => c.innerHTML += '<span style="color:#00ff00;font-weight:bold">> SYSTEM READY.</span>', 2500);
+        }
+
+        // 火箭彩蛋
+        document.getElementById('rocketLogo').onclick = function() {
+            this.style.transform = 'translateY(-500px)';
+            setTimeout(() => {
+                this.style.transition = 'none';
+                this.style.transform = 'translateY(100px)';
                 setTimeout(() => {
-                    rocket.style.transition = 'all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-                    rocket.style.transform = 'translateY(0)';
+                    this.style.transition = 'transform 0.5s';
+                    this.style.transform = 'translateY(0)';
                 }, 50);
             }, 500);
-        });
+        }
     </script>
 </body>
 </html>
